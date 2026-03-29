@@ -1,0 +1,27 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.naw.resource_tree.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+  ],
+  "client": [
+    "ResourcePackScreenMixin",
+    "ResourcePackManagerMixin",
+    "ResourcePackOrganizerMixin",
+    "PackListWidgetMixin",
+    "PackScreenAccessor",
+    "ResourcePackEntryAccessor",
+    "ResourcePackEntryMixin",
+    "PackScreenMixin",
+    "PackScreenSearchAccessor",
+    "PackScreenOrganizerAccessor",
+    "PackScreenAvailableListAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

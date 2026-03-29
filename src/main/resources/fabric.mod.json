@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "resource_tree",
+  "version": "${version}",
+  "name": "Resource Tree",
+  "description": "Organize your resource packs into folders with navigation, color coding, and pack management tools.",
+  "authors": [
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/project/resource-tree-mod",
+    "issues": "https://github.com/Naw7k/resource-tree/issues"
+  },
+  "license": "MIT",
+  "icon": "assets/resource_tree/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "net.naw.resource_tree.client.Resource_treeClient"
+    ],
+    "main": [
+      "net.naw.resource_tree.Resource_tree"
+    ]
+  },
+  "mixins": [
+    "resource_tree.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
