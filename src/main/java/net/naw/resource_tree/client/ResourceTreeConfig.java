@@ -16,6 +16,17 @@ public class ResourceTreeConfig {
     public static boolean hideIncompatiblePacks = false; // Hides red warning packs
     public static boolean searchInsideFolders = false;   // Allows search to "dig" into subfolders
 
+    // --- SORT SETTING ---
+    // Controls how packs are ordered in the available list.
+    // Folders always stay on top — only packs below them are affected.
+    public enum SortMode {
+        NAME_ASC,   // A → Z (default)
+        NAME_DESC,  // Z → A
+        DATE_NEW,   // Newest modified first
+        DATE_OLD    // Oldest modified first
+    }
+    public static SortMode sortMode = SortMode.NAME_ASC; // Default sort
+
     // --- FOLDER COLOR STORAGE ---
     // A "Map" is like a dictionary: the Key is the Folder Name, and the Value is the Color Code.
     public static Map<String, Integer> folderColors = new HashMap<>();
@@ -60,6 +71,15 @@ public class ResourceTreeConfig {
             if (json.has("searchInsideFolders"))
                 searchInsideFolders = json.get("searchInsideFolders").getAsBoolean();
 
+            // Load sort mode from config, fall back to default if missing or invalid
+            if (json.has("sortMode")) {
+                try {
+                    sortMode = SortMode.valueOf(json.get("sortMode").getAsString());
+                } catch (IllegalArgumentException e) {
+                    sortMode = SortMode.NAME_ASC; // Reset to default if saved value is unrecognized
+                }
+            }
+
             if (json.has("folderColors")) {
                 JsonObject colors = json.getAsJsonObject("folderColors");
                 for (String key : colors.keySet()) {
@@ -81,6 +101,7 @@ public class ResourceTreeConfig {
             json.addProperty("hideBuiltinPacks", hideBuiltinPacks);
             json.addProperty("hideIncompatiblePacks", hideIncompatiblePacks);
             json.addProperty("searchInsideFolders", searchInsideFolders);
+            json.addProperty("sortMode", sortMode.name()); // Save sort mode as a string e.g. "NAME_ASC"
 
             JsonObject colors = new JsonObject();
             for (Map.Entry<String, Integer> entry : folderColors.entrySet()) {
