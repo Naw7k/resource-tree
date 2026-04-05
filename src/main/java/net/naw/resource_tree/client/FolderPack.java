@@ -56,7 +56,8 @@ public class FolderPack implements ResourcePackOrganizer.Pack {
     @Override public void enable() { screen.navigateTo(folder); }
     @Override public void disable() { screen.navigateTo(folder); }
 
-    // --- MISC PACK SETTINGS ---
+    // --- PACK SETTINGS ---
+    // Standard overrides to make the folder behave like a compatible, non-movable pack
     @Override public ResourcePackCompatibility getCompatibility() { return ResourcePackCompatibility.COMPATIBLE; }
     @Override public String getName() { return "folder:" + folder.getAbsolutePath(); }
 
