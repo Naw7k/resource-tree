@@ -51,9 +51,8 @@ public class DropdownMenuWidget extends ClickableWidget {
      * Handles clicks for both the main button and the internal menu items.
      * @param button The mouse button (0 for left-click). Parameter is required by method signature.
      */
-    @SuppressWarnings("unused")
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!this.active || !this.visible) return false;
+        if (!this.active || !this.visible || button != 0) return false;
 
         // If clicking away while the menu is open, close it
         if (!isMouseOver(mouseX, mouseY)) {
