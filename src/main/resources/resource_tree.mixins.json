@@ -16,7 +16,8 @@
     "PackScreenMixin",
     "PackScreenSearchAccessor",
     "PackScreenOrganizerAccessor",
-    "PackScreenAvailableListAccessor"
+    "PackScreenAvailableListAccessor",
+    "EntryListWidgetAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
