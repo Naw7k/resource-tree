@@ -53,9 +53,11 @@ public class NewFolderButton extends ClickableWidget {
         }
     }
 
-    @SuppressWarnings("unused")
+
+    // --- CLICK HANDLING ---
+    // Checks for a valid left-click and ensures we are on the right screen
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (!this.active || !this.visible) return false;
+        if (!this.active || !this.visible || button != 0) return false;
         if (mouseX < getX() || mouseX > getX() + 20 || mouseY < getY() || mouseY > getY() + 20) return false;
 
         this.playDownSound(MinecraftClient.getInstance().getSoundManager());
