@@ -8,9 +8,11 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.pack.PackScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
+import net.naw.resource_tree.client.DragDropManager;
 import net.naw.resource_tree.client.DropdownMenuWidget;
 import net.naw.resource_tree.client.FolderColorPalette;
 import net.naw.resource_tree.client.NewFolderButton;
+import net.naw.resource_tree.client.SortButton;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,22 +26,25 @@ public abstract class PackScreenMixin extends Screen {
 
     @Unique private DropdownMenuWidget dropdownMenu;
     @Unique private NewFolderButton newFolderButton;
+    @Unique private SortButton sortButton;
     @Unique private final FolderColorPalette folderColorPalette = FolderColorPalette.INSTANCE;
 
     protected PackScreenMixin() { super(null); }
 
     // --- INITIALIZATION ---
-    // Injects into the end of the init() method to create and add the dropdown and new folder buttons.
+    // Injects into the end of the init() method to create and add the dropdown, new folder, and sort buttons.
     @Inject(at = @At("TAIL"), method = "init")
     private void onInit(CallbackInfo ci) {
         this.dropdownMenu = new DropdownMenuWidget(0, 0);
         this.addDrawableChild(this.dropdownMenu);
         this.newFolderButton = new NewFolderButton(0, 0);
         this.addDrawableChild(this.newFolderButton);
+        this.sortButton = new SortButton(0, 0);
+        this.addDrawableChild(this.sortButton);
         searchAndAlign(this);
     }
 
-    // Ensures the dropdown stays in the correct spot if the window is resized.
+    // Ensures the buttons stay in the correct spot if the window is resized.
     @Inject(at = @At("TAIL"), method = "refreshWidgetPositions")
     private void onRefreshWidgetPositions(CallbackInfo ci) {
         if (this.dropdownMenu == null) return;
@@ -47,7 +52,7 @@ public abstract class PackScreenMixin extends Screen {
     }
 
     // --- INPUT HANDLING ---
-// Overrides the mouse click logic so our custom menus get priority over vanilla buttons.
+    // Overrides the mouse click logic so our custom menus get priority over vanilla buttons.
     public boolean mouseClicked(Click click, boolean bl) {
         if (FolderColorPalette.INSTANCE.isRenaming()) {
             FolderColorPalette.INSTANCE.keyPressed(256); // treat any click as Escape
@@ -59,7 +64,19 @@ public abstract class PackScreenMixin extends Screen {
         if (dropdownMenu != null && dropdownMenu.mouseClicked(click.x(), click.y(), 0)) return true;
         // Then the new folder button
         if (newFolderButton != null && newFolderButton.mouseClicked(click.x(), click.y(), 0)) return true;
+        // Then the sort button
+        if (sortButton != null && sortButton.mouseClicked(click.x(), click.y(), 0)) return true;
         return super.mouseClicked(click, bl);
+    }
+
+    // --- MOUSE RELEASE ---
+    // When the user releases the mouse, check if we were dragging and handle the drop
+    public boolean mouseReleased(Click click) {
+        if (click.button() == 0 && (DragDropManager.isDragging() || DragDropManager.isPressing())) {
+            DragDropManager.handleDrop((int) click.x(), (int) click.y());
+            return true;
+        }
+        return super.mouseReleased(click);
     }
 
     // --- KEYBOARD INPUT ---
@@ -82,25 +99,41 @@ public abstract class PackScreenMixin extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         boolean dropdownBlocking = dropdownMenu != null && dropdownMenu.isOpen() && dropdownMenu.isMouseOver(mouseX, mouseY);
         boolean paletteBlocking = FolderColorPalette.INSTANCE.isVisible() && FolderColorPalette.INSTANCE.isMouseOver(mouseX, mouseY);
+        boolean sortBlocking = sortButton != null && sortButton.isOpen() && sortButton.isMouseOver(mouseX, mouseY);
 
-        if (dropdownBlocking || paletteBlocking) {
+        if (dropdownBlocking || paletteBlocking || sortBlocking) {
             // "Tricks" the super.render by passing -1 to hide the real mouse position
             super.render(context, -1, -1, delta);
             if (dropdownBlocking) dropdownMenu.render(context, mouseX, mouseY, delta);
+            if (sortBlocking) sortButton.render(context, mouseX, mouseY, delta);
         } else {
             super.render(context, mouseX, mouseY, delta);
         }
         // Always draw the palette last so it sits on top
         FolderColorPalette.INSTANCE.render(context, mouseX, mouseY);
+
+        // --- DRAG PREVIEW ---
+        // Draw the floating pack name following the cursor while dragging
+        DragDropManager.renderDrag(context, mouseX, mouseY);
     }
 
     // --- ALIGNMENT LOGIC ---
-    // Recursively searches for the "Open Pack Folder" button to place the dropdown and new folder button next to it.
+    // Recursively searches for the "Open Pack Folder" button to place our buttons next to it.
+    // Sort button anchors to the left of the search box.
     @Unique
     private void searchAndAlign(ParentElement parent) {
+        // --- SORT BUTTON ANCHOR ---
+        // Place sort button to the left of the search box
+        net.minecraft.client.gui.widget.TextFieldWidget searchBox =
+                ((PackScreenSearchAccessor) this).getSearchBox();
+        if (searchBox != null && sortButton != null) {
+            sortButton.setX(searchBox.getX() - 18);
+            sortButton.setY(searchBox.getY());
+        }
+
+        // --- BOTTOM BUTTONS ANCHOR ---
         for (Element child : parent.children()) {
             if (child instanceof ClickableWidget widget) {
-                // If the button text matches the vanilla "Open Pack Folder" string
                 if (widget.getMessage().getString().equals(
                         Text.translatable("pack.openFolder").getString())) {
                     this.dropdownMenu.setX(widget.getX() - 24);
