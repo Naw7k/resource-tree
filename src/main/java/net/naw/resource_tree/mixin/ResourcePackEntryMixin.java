@@ -35,12 +35,19 @@ public class ResourcePackEntryMixin {
         PackSelectionModel.Entry pack = ((ResourcePackEntryAccessor)this).getPack();
 
         if (!(pack instanceof FolderPack folderPack)) {
-            // --- SHIFT+CLICK TO ENABLE ---
+            // --- SHIFT+CLICK TO ENABLE/DISABLE ---
             // shift+click system that correctly accounts for folder entries
             if (click.button() == 0 && click.hasShiftDown() && !DragDropManager.isDragging()) {
                 if (pack.canSelect()) {
                     pack.select();
-                    // Refresh the screen
+                    Minecraft client = Minecraft.getInstance();
+                    if (client.screen instanceof ResourceTreeScreen rts) {
+                        rts.navigateTo(rts.getCurrentFolder());
+                    }
+                    cir.setReturnValue(true);
+                    return;
+                } else if (pack.canUnselect()) {
+                    pack.unselect();
                     Minecraft client = Minecraft.getInstance();
                     if (client.screen instanceof ResourceTreeScreen rts) {
                         rts.navigateTo(rts.getCurrentFolder());
