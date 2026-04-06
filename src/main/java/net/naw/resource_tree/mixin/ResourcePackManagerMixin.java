@@ -24,7 +24,12 @@ public class ResourcePackManagerMixin {
     private void onDiscoverAvailable(CallbackInfoReturnable<Map<String, Pack>> cir) {
         // Guard against being called before Minecraft is initialized
         Minecraft client = Minecraft.getInstance();
-        if (client == null) return;
+        // Only run our scanner when on main menu or pack screen — not during world load
+        if (client.screen != null &&
+                !(client.screen instanceof net.minecraft.client.gui.screens.TitleScreen) &&
+                !(client.screen instanceof net.minecraft.client.gui.screens.packs.PackSelectionScreen)) {
+            return;
+        }
 
         // --- MUTABLE CONVERSION ---
         // Vanilla returns an ImmutableMap (unchangeable).
