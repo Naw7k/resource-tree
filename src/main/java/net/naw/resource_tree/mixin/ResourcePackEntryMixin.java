@@ -59,7 +59,7 @@ public class ResourcePackEntryMixin {
 
             if (click.button() == 0 && !DragDropManager.isDragging()) {
                 String name = pack.getId();
-                if (name.startsWith("file/")) {
+                if (name.startsWith("file/") && !pack.isSelected()) {
                     Minecraft client = Minecraft.getInstance();
                     if (client.screen instanceof ResourceTreeScreen resourceTreeScreen) {
                         String relativePath = name.substring("file/".length()).replace("/", File.separator);
