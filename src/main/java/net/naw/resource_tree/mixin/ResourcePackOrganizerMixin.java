@@ -26,7 +26,7 @@ public class ResourcePackOrganizerMixin {
     // This controls which packs are visible in the left-hand "Available" column.
     @Inject(at = @At("RETURN"), method = "getUnselected", cancellable = true)
     private void onGetUnselected(CallbackInfoReturnable<Stream<PackSelectionModel.Entry>> cir) {
-        org.slf4j.LoggerFactory.getLogger("ResourceTree").info("onGetUnselected called, folder filter: {}", ResourceTreeScreen.currentFilterFolder);
+
 
         final String folder = ResourceTreeScreen.currentFilterFolder;
 
