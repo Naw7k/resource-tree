@@ -67,10 +67,12 @@ public class PackListWidgetMixin {
         // Add a folder entry for each subfolder found in the current directory.
         // Folders are always sorted A-Z regardless of the user's sort setting —
         // they stay on top and have their own fixed order.
+        // Skip folders that are actually unzipped resource packs (contain pack.mcmeta)
         File[] subfolders = currentFolder.listFiles(File::isDirectory);
         if (subfolders != null) {
             java.util.Arrays.sort(subfolders, Comparator.comparing(f -> f.getName().toLowerCase()));
             for (File folder : subfolders) {
+                if (new File(folder, "pack.mcmeta").exists()) continue;
                 injected.add(new FolderPack(folder.getName(), folder, screen, false));
             }
         }
