@@ -37,8 +37,42 @@ public class SubfolderResourcePackProvider implements RepositorySource {
 
         for (File file : files) {
             if (file.isDirectory()) {
-                // RECURSION: We found a folder, so run this same scan INSIDE that folder.
-                scanFolder(file, profileAdder);
+                // Check if this folder is actually an unzipped resource pack
+                // by looking for a pack.mcmeta file inside it
+                File mcmeta = new File(file, "pack.mcmeta");
+                if (mcmeta.exists()) {
+                    // This folder is a valid resource pack — register it like a zip
+                    String relativePath = getRelativePath(file);
+                    String packId = "file/" + relativePath;
+                    String displayName = file.getName();
+
+                    PackLocationInfo info = new PackLocationInfo(
+                            packId,
+                            Component.literal(displayName),
+                            PackSource.DEFAULT,
+                            Optional.empty()
+                    );
+
+                    PackSelectionConfig selectionConfig = new PackSelectionConfig(
+                            false,
+                            Pack.Position.TOP,
+                            false
+                    );
+
+                    Pack pack = Pack.readMetaAndCreate(
+                            info,
+                            new net.minecraft.server.packs.PathPackResources.PathResourcesSupplier(file.toPath()),
+                            PackType.CLIENT_RESOURCES,
+                            selectionConfig
+                    );
+
+                    if (pack != null) {
+                        profileAdder.accept(pack);
+                    }
+                } else {
+                    // RECURSION: No pack.mcmeta found, so it's a real folder — scan inside it.
+                    scanFolder(file, profileAdder);
+                }
             } else if (file.getName().endsWith(".zip")) {
                 // We found a pack! Now we need to tell Minecraft how to identify it.
 
