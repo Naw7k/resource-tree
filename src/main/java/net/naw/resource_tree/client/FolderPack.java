@@ -100,8 +100,11 @@ public class FolderPack implements PackSelectionModel.Entry {
     // Counts how many .zip resource packs are directly inside this folder (no subfolders counted)
     public int getDirectPackCount() {
         if (isBack) return 0;
-        File[] files = folder.listFiles(f -> !f.isDirectory() && f.getName().endsWith(".zip"));
-        return files == null ? 0 : files.length;
+        File[] zips = folder.listFiles(f -> !f.isDirectory() && f.getName().endsWith(".zip"));
+        File[] folderPacks = folder.listFiles(f -> f.isDirectory() && new File(f, "pack.mcmeta").exists());
+        int zipCount = zips == null ? 0 : zips.length;
+        int folderCount = folderPacks == null ? 0 : folderPacks.length;
+        return zipCount + folderCount;
     }
 
     public boolean isBack() { return isBack; }
